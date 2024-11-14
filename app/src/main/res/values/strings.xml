@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Inventory Management Application</string>
+    <string name="home">Home</string>
+    <string name="add_item">Add Item</string>
+    <string name="edit_item">Edit Item</string>
+    <string name="item_detail">Item Detail</string>
+
+    <string name="start_screen_title">Welcome to JH Inventory Management Application</string>
+    <string name="start_screen_subtitle">Click the Start button below</string>
+    <string name="start_screen_button">Get Started</string>
+</resources>
