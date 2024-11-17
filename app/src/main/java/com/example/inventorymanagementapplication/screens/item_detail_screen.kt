@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.inventorymanagementapplication.data.ItemDetail
+import com.example.inventorymanagementapplication.data.InventoryItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,7 +24,7 @@ fun ItemDetailScreen(
 ) {
     // Sample data - replace with actual data from your ViewModel
     val item = remember {
-        ItemDetail(
+        InventoryItem(
             name = "Sample Item",
             category = "Electronics",
             quantity = 100,
@@ -32,7 +32,6 @@ fun ItemDetailScreen(
             minimumStock = 20,
             location = "Warehouse A",
             description = "This is a sample item description that provides detailed information about the product.",
-            lastUpdated = "2024-03-09"
         )
     }
 
@@ -124,7 +123,6 @@ fun ItemDetailScreen(
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
-                DetailRow("Last Updated", item.lastUpdated)
             }
 
             // Action Buttons

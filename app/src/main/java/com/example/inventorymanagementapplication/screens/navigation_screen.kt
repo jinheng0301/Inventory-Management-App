@@ -1,6 +1,5 @@
 package com.example.inventorymanagementapplication.screens
 
-import AppDatabase
 import android.annotation.SuppressLint
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,10 +14,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -29,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.inventorymanagementapplication.R
+import com.example.inventorymanagementapplication.models.InventoryViewModel
 
 enum class NavigationScreen(@StringRes val title: Int) {
     Start(R.string.app_name),
@@ -37,138 +34,72 @@ enum class NavigationScreen(@StringRes val title: Int) {
     ItemDetail(R.string.item_detail)
 }
 
-val LocalAppDatabase = compositionLocalOf<AppDatabase> { error("AppDatabase not provided") }
-
-//@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-//@Composable
-//fun NavigationScreen(
-//    navController: NavHostController = rememberNavController(),
-//) {
-//    val backStackEntry by navController.currentBackStackEntryAsState()
-//    val currentScreen = try {
-//        NavigationScreen.valueOf(backStackEntry?.destination?.route ?: NavigationScreen.Start.name)
-//    } catch (e: IllegalArgumentException) {
-//        NavigationScreen.Start
-//    }
-//
-//    // Initialize AppDatabase instance
-//    val context = LocalContext.current.applicationContext
-//    val appDatabase = remember { AppDatabase.getDatabase(context) }
-//
-//    CompositionLocalProvider(LocalAppDatabase provides appDatabase) {
-//        Scaffold(
-//            bottomBar = {
-//                if (currentScreen != NavigationScreen.Start) {
-//                    BottomNavigationBar(navController)  // Removed appDatabase parameter
-//                }
-//            }
-//        ) { innerPadding ->
-//            NavHost(
-//                navController = navController,
-//                startDestination = NavigationScreen.Start.name,
-//                modifier = Modifier.padding(innerPadding)
-//            ) {
-//                composable(route = NavigationScreen.Start.name) {
-//                    StartScreen(
-//                        onNextButtonClicked = {
-//                            navController.navigate(NavigationScreen.Home.name) {
-//                                popUpTo(NavigationScreen.Start.name) {
-//                                    inclusive = true
-//                                }
-//                            }
-//                        }
-//                    )
-//                }
-//                composable(route = NavigationScreen.Home.name) {
-//                    HomeScreen(
-//                        onNextButtonClicked = {},
-//                        modifier = Modifier.fillMaxSize(),
-//                        navigateToAddEdit = {
-//                            navController.navigate(NavigationScreen.Add.name)
-//                        }
-//                    )
-//                }
-//
-//                composable(route = NavigationScreen.Add.name) {
-//                    AddEditScreen(
-//                        onNextButtonClicked = {},
-//                        modifier = Modifier.fillMaxSize(),
-//                        onNavigateToHome = {
-//                            navController.navigate(NavigationScreen.Home.name)
-//                        }
-//                    )
-//                }
-//
-//                composable(route = NavigationScreen.ItemDetail.name) {
-//                    ItemDetailScreen(
-//                        onNextButtonClicked = {},
-//                        modifier = Modifier.fillMaxSize()
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun NavigationScreen(
     navController: NavHostController = rememberNavController(),
+    inventoryViewModel: InventoryViewModel
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentScreen = NavigationScreen.valueOf(
-        backStackEntry?.destination?.route ?: NavigationScreen.Start.name
-    )
+    val currentScreen = try {
+        NavigationScreen.valueOf(backStackEntry?.destination?.route ?: NavigationScreen.Start.name)
+    } catch (e: IllegalArgumentException) {
+        NavigationScreen.Start
+    }
 
-    Scaffold(
-        bottomBar = {
-            if (currentScreen != NavigationScreen.Start) {
-                BottomNavigationBar(navController)
+        Scaffold(
+            bottomBar = {
+                if (currentScreen != NavigationScreen.Start) {
+                    BottomNavigationBar(navController)  // Removed appDatabase parameter
+                }
             }
-        }
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = NavigationScreen.Start.name,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable(route = NavigationScreen.Start.name) {
-                StartScreen(
-                    onNextButtonClicked = {
-                        navController.navigate(NavigationScreen.Home.name) {
-                            popUpTo(NavigationScreen.Start.name) {
-                                inclusive = true
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = NavigationScreen.Start.name,
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                composable(route = NavigationScreen.Start.name) {
+                    StartScreen(
+                        onNextButtonClicked = {
+                            navController.navigate(NavigationScreen.Home.name) {
+                                popUpTo(NavigationScreen.Start.name) {
+                                    inclusive = true
+                                }
                             }
                         }
-                    }
-                )
-            }
-            composable(route = NavigationScreen.Home.name) {
-                HomeScreen(
-                    onNextButtonClicked = {},
-                    modifier = Modifier.fillMaxSize(),
-                    navigateToAddEdit = {
-                        navController.navigate(NavigationScreen.Add.name)
-                    }
-                )
-            }
-            composable(route = NavigationScreen.Add.name) {
-                AddEditScreen(
-                    onNextButtonClicked = {},
-                    modifier = Modifier.fillMaxSize(),
-                    onNavigateToHome = {
-                        navController.navigate(NavigationScreen.Home.name)
-                    }
-                )
-            }
-            composable(route = NavigationScreen.ItemDetail.name) {
-                ItemDetailScreen(
-                    onNextButtonClicked = {},
-                    modifier = Modifier.fillMaxSize()
-                )
+                    )
+                }
+                composable(route = NavigationScreen.Home.name) {
+                    HomeScreen(
+                        onNextButtonClicked = {},
+                        modifier = Modifier.fillMaxSize(),
+                        navigateToAddEdit = {
+                            navController.navigate(NavigationScreen.Add.name)
+                        }
+                    )
+                }
+
+                composable(route = NavigationScreen.Add.name) {
+                    AddEditScreen(
+                        onNextButtonClicked = {},
+                        modifier = Modifier.fillMaxSize(),
+                        InventoryViewModel = inventoryViewModel,
+                        onNavigateToHome = {
+                            navController.navigate(NavigationScreen.Home.name)
+                        }
+                    )
+                }
+
+                composable(route = NavigationScreen.ItemDetail.name) {
+                    ItemDetailScreen(
+                        onNextButtonClicked = {},
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
-    }
+
 }
 
 @Composable

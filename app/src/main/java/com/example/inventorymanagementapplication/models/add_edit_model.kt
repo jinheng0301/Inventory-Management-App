@@ -1,24 +1,50 @@
 package com.example.inventorymanagementapplication.models
 
-import android.content.Context
-import com.example.inventorymanagementapplication.data.ItemDetail
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.inventorymanagementapplication.data.InventoryItem
 import kotlinx.coroutines.launch
 
-class AddEditModel(context: Context) {
-    private val inventoryDao = AppDatabase.getDatabase(context).inventoryDao()
+class InventoryViewModel(application: Application) : AndroidViewModel(application) {
+    private val inventoryDao = DatabaseProvider.getDatabase(application).inventoryDao()
 
-    // Save the item using Room
-    fun saveItem(item: ItemDetail, onSaved: (Boolean) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                inventoryDao.insertItem(item)
-                onSaved(true)
-            } catch (e: Exception) {
-                e.printStackTrace() // Log for debugging
-                onSaved(false)
-            }
+    // Insert item into the database
+    suspend fun insertItem(item: InventoryItem) {
+        viewModelScope.launch {
+            inventoryDao.insertItem(item)
         }
     }
+
+    //Retrieve one item
+    suspend fun getOneItem(name: String): InventoryItem? {
+        return inventoryDao.getOneItem(name) // Example repository function
+    }
+
+    suspend fun update(item: InventoryItem)
+    {
+        viewModelScope.launch {
+            inventoryDao.update(item)
+        }
+    }
+
+    suspend fun getHighestId():Int?{
+        return inventoryDao.getHighestId()
+    }
+
+
+    // Retrieve all items
+    suspend fun getAllItems() = inventoryDao.getAllItems()
+
+    // Delete an item by its ID
+    suspend fun deleteItem(name:String): Result<Boolean> {
+        return try {
+            inventoryDao.deleteItem(name)
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 }
+
