@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -9,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.inventorymanagementapplication"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -30,17 +31,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.4"
     }
     packaging {
         resources {
@@ -64,6 +65,7 @@ dependencies {
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.media3.database)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -71,4 +73,20 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.navigation.compose.v280)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.material)
+    implementation(libs.ui)
+    implementation(libs.annotations)
+    implementation(libs.androidx.hilt.navigation.compose)
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("org.jetbrains:annotations:23.0.0")
+    }
+    exclude(group = "com.intellij", module = "annotations")
 }

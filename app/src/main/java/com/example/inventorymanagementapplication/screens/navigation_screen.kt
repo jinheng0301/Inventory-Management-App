@@ -1,6 +1,7 @@
 package com.example.inventorymanagementapplication.screens
 
 import android.annotation.SuppressLint
+import android.app.Application
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -38,14 +42,21 @@ enum class NavigationScreen(@StringRes val title: Int) {
 @Composable
 fun NavigationScreen(
     navController: NavHostController = rememberNavController(),
-    inventoryViewModel: InventoryViewModel
+    //inventoryViewModel: InventoryViewModel
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
+    val context = LocalContext.current
+    val application = context.applicationContext as Application
+
+    val inventoryViewModel: InventoryViewModel = viewModel(
+        factory = InventoryViewModelFactory(application)
+    )
     val currentScreen = try {
         NavigationScreen.valueOf(backStackEntry?.destination?.route ?: NavigationScreen.Start.name)
     } catch (e: IllegalArgumentException) {
         NavigationScreen.Start
     }
+
 
         Scaffold(
             bottomBar = {
@@ -85,7 +96,7 @@ fun NavigationScreen(
                         onNextButtonClicked = {},
                         modifier = Modifier.fillMaxSize(),
                         InventoryViewModel = inventoryViewModel,
-                        onNavigateToHome = {
+                    onNavigateToHome = {
                             navController.navigate(NavigationScreen.Home.name)
                         }
                     )
@@ -130,5 +141,15 @@ fun BottomNavigationBar(navController: NavHostController) {  // Removed appDatab
                 }
             )
         }
+    }
+}
+class InventoryViewModelFactory(private val application: Application) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(InventoryViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return InventoryViewModel(application) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

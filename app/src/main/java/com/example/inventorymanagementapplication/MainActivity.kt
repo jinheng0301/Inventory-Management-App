@@ -14,14 +14,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Create an instance of InventoryViewModel
-        val inventoryViewModel = ViewModelProvider(this)[InventoryViewModel::class.java]
+//        // Create an instance of InventoryViewModel
+        //val inventoryViewModel = ViewModelProvider(this)[InventoryViewModel::class.java]
 
         setContent {
-            InventoryManagementApplicationTheme {
+            NavigationScreen()
+            //InventoryManagementApplicationTheme {
                 // Pass the InventoryViewModel to NavigationScreen
-                NavigationScreen(inventoryViewModel = inventoryViewModel)
-            }
+                //NavigationScreen(inventoryViewModel = inventoryViewModel)
+           // }
         }
     }
 }

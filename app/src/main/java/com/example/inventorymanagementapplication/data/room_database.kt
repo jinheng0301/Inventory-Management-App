@@ -10,7 +10,7 @@ object DatabaseProvider {
 
     fun getDatabase(context: Context): InventoryDatabase {
         return INSTANCE ?: synchronized(this) {
-            Room.databaseBuilder(context, InventoryDatabase::class.java, "inventory_database")
+            Room.databaseBuilder(context.applicationContext, InventoryDatabase::class.java, "inventory_database")
                 .fallbackToDestructiveMigration()
                 .build()
                 .also { INSTANCE = it }
