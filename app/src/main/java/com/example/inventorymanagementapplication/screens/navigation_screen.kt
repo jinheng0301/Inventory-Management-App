@@ -1,5 +1,6 @@
 package com.example.inventorymanagementapplication.screens
 
+import InventoryViewModel
 import android.annotation.SuppressLint
 import android.app.Application
 import androidx.annotation.StringRes
@@ -29,7 +30,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.inventorymanagementapplication.R
-import com.example.inventorymanagementapplication.models.InventoryViewModel
+import com.example.project.ui.screens.HomeScreen
 
 enum class NavigationScreen(@StringRes val title: Int) {
     Start(R.string.app_name),
@@ -83,8 +84,11 @@ fun NavigationScreen(
                 }
                 composable(route = NavigationScreen.Home.name) {
                     HomeScreen(
-                        onNextButtonClicked = {},
+                        onNextButtonClicked = { id ->
+                            navController.navigate("${NavigationScreen.ItemDetail.name}/$id")
+                        },
                         modifier = Modifier.fillMaxSize(),
+                        inventoryViewModel = inventoryViewModel,
                         navigateToAddEdit = {
                             navController.navigate(NavigationScreen.Add.name)
                         }
@@ -111,6 +115,17 @@ fun NavigationScreen(
             }
         }
 
+}
+
+class InventoryViewModelFactory(private val application: Application) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(InventoryViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return InventoryViewModel(application) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }
 
 @Composable
@@ -141,15 +156,5 @@ fun BottomNavigationBar(navController: NavHostController) {  // Removed appDatab
                 }
             )
         }
-    }
-}
-class InventoryViewModelFactory(private val application: Application) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(InventoryViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return InventoryViewModel(application) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

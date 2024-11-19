@@ -1,23 +1,50 @@
-package com.example.inventorymanagementapplication.screens
+package com.example.project.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import InventoryViewModel
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 @Composable
 fun HomeScreen(
     onNextButtonClicked: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    navigateToAddEdit: () -> Unit = {} // Add navigation parameter
+    inventoryViewModel: InventoryViewModel,
+    navigateToAddEdit: () -> Unit = {}
 ) {
+    // Trigger data fetching
+    LaunchedEffect(Unit) {
+        inventoryViewModel.fetchItems()
+    }
+
+    // Collect inventory items state
+    val inventoryItems by inventoryViewModel.inventoryItems.collectAsState()
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = Color(0xFFFFF8E1) // Warmer, more pleasant background color
@@ -27,7 +54,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(24.dp) // Increased padding for better spacing
         ) {
-            // Dashboard Header with improved typography
+            // Dashboard Header
             Text(
                 text = "Dashboard",
                 style = MaterialTheme.typography.headlineMedium,
@@ -37,53 +64,30 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Total Stock Info Section with improved layout
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp) // Consistent spacing
-            ) {
-                InfoCard(
-                    "Total Units in Stock",
-                    "786",
-                    MaterialTheme.colorScheme.primary
-                )
-                InfoCard(
-                    "Total Inventory Value",
-                    "$565,430.00",
-                    MaterialTheme.colorScheme.secondary
-                )
+            // Total Stock Info Section
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                items(inventoryItems) { item ->
+                    InfoCard(
+                        title = "Total Units in Stock",
+                        value = item.quantity.toString(),
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                    InfoCard(
+                        title = "Total Inventory Value",
+                        value = (item.quantity * item.price).toString(),
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
+                    InventoryItemCard(
+                        itemName = item.name,
+                        itemCount = item.quantity.toString(),
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Inventory Section Header
-            Text(
-                text = "Inventory",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Inventory Items with improved styling
-            InventoryItemCard(
-                "No. of Tires",
-                "486",
-                "1 / 12",
-                MaterialTheme.colorScheme.primaryContainer
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            InventoryItemCard(
-                "No. of Wheels",
-                "300",
-                "2 / 14",
-                MaterialTheme.colorScheme.secondaryContainer
-            )
 
             Spacer(modifier = Modifier.weight(1f)) // Push button to bottom
 
-            // Add Stock Button with improved styling
+            // Add Stock Button
             Button(
                 onClick = { navigateToAddEdit() },
                 modifier = Modifier
@@ -145,7 +149,7 @@ fun InfoCard(
 fun InventoryItemCard(
     itemName: String,
     itemCount: String,
-    reorderLevel: String,
+    //reorderLevel: String,
     containerColor: Color
 ) {
     Card(
@@ -177,11 +181,6 @@ fun InventoryItemCard(
                     text = "Stock: $itemCount",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Text(
-                    text = "Reorder level: $reorderLevel",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
             FilledTonalButton(

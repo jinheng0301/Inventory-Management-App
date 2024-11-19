@@ -14,7 +14,7 @@ interface InventoryDao {
     suspend fun update(item: InventoryItem)
 
     @Insert
-    suspend fun insertItem(item: InventoryItem)
+    fun insertItem(item: InventoryItem)
 
     @Query("SELECT * FROM inventory_items WHERE name = :name LIMIT 1")
     suspend fun getOneItem(name: String): InventoryItem?

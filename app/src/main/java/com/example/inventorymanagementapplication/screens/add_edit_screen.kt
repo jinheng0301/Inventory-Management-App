@@ -1,5 +1,6 @@
 package com.example.inventorymanagementapplication.screens
 
+import InventoryViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,7 +15,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.inventorymanagementapplication.data.InventoryItem
-import com.example.inventorymanagementapplication.models.InventoryViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,10 +23,10 @@ fun AddEditScreen(
     onNextButtonClicked: (Int) -> Unit,
     modifier: Modifier = Modifier,
     onNavigateToHome: () -> Unit = {},
-    isEditing: Boolean = false,
     InventoryViewModel: InventoryViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
+    var isEditing = false
 
     // State variables
     var itemName by remember { mutableStateOf("") }
@@ -36,6 +36,7 @@ fun AddEditScreen(
     var minimumStock by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    val id = remember { mutableStateOf("") }
 
     // Error states
     var itemNameError by remember { mutableStateOf<String?>(null) }
@@ -47,7 +48,26 @@ fun AddEditScreen(
     var descriptionError by remember { mutableStateOf<String?>(null) }
 
     // Save confirmation dialog state
-    var showDialog by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableIntStateOf(0) }
+
+    fun getOneItem() {
+        coroutineScope.launch {
+            val item = InventoryViewModel.getOneItem(itemName)
+            if (item != null) {
+                id.value = item.id.toString()
+                itemName = item.name
+                category = item.category
+                quantity = item.quantity.toString()
+                price = item.price.toString()
+                minimumStock = item.minimumStock.toString()
+                location = item.location
+                description = item.description
+                isEditing = true
+            } else {
+                showDialog=1
+            }
+        }
+    }
 
     // Centralized validation function
     fun validateInputs(): Boolean {
@@ -96,7 +116,10 @@ fun AddEditScreen(
     fun saveItem() {
         if (validateInputs()) {
             coroutineScope.launch {
-                val newId = InventoryViewModel.getHighestId()?.plus(1) ?: 1
+                val newId = if (!isEditing) {
+                    val highestId = InventoryViewModel.getHighestId() ?: 0 // Get the max ID
+                    highestId + 1
+                } else id.value.toInt()
                 val newItem = InventoryItem(
                     id = newId,
                     name = itemName,
@@ -107,8 +130,13 @@ fun AddEditScreen(
                     location = location,
                     description = description
                 )
-                InventoryViewModel.insertItem(newItem)
-                showDialog = true // Show confirmation dialog
+                if (isEditing) {
+                    InventoryViewModel.update(newItem)
+
+                } else {
+                    InventoryViewModel.insertItem(newItem)
+                }
+                showDialog=2
             }
         }
     }
@@ -237,20 +265,46 @@ fun AddEditScreen(
                 ) {
                     Text(if (isEditing) "Update" else "Save")
                 }
+
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            getOneItem()
+                        }
+                    },
+                ) {
+                    Text("Retrieve Item")
+                }
             }
         }
     }
 
     // Save Confirmation Dialog
-    if (showDialog) {
+    if (showDialog==1) {
         AlertDialog(
-            onDismissRequest = { showDialog = false },
+            onDismissRequest = { showDialog = 0 },
+            title = { Text("No data found") },
+            text = { Text("This item name is not in the database") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = 0
+                    }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+    else if (showDialog==2) {
+        AlertDialog(
+            onDismissRequest = { showDialog = 0 },
             title = { Text("Save Successful") },
             text = { Text("Your item has been saved successfully.") },
             confirmButton = {
                 Button(
                     onClick = {
-                        showDialog = false
+                        showDialog = 0
                         onNavigateToHome()
                     }
                 ) {
